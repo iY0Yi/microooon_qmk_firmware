@@ -32,7 +32,7 @@ int xmove,ymove;
 int read_action(int direction) {
     int *action_array;
     int *last_action_array;
-    
+
     if(direction == DIRECTION_X){
         action_array = x_actions;
         last_action_array = x_last_actions;
@@ -45,7 +45,7 @@ int read_action(int direction) {
 
     for(int i = 0; i < 2; ++i) {
         action_array[i] = readPin(trackball_pins[direction][i]);
-        
+
         if(action_array[i] != last_action_array[i]) {
             last_action_array[i] = action_array[i];
 
@@ -80,12 +80,30 @@ void pointing_device_driver_init(void) {
         x_last_actions[i] = 0;
         y_last_actions[i] = 0;
     }
-    
+
 
     blackberry_mouse_cpi = DEFAULT_BLACKBERRY_TRACKBALL_CPI;
 }
 
-report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) { 
+// report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
+
+//     xmove = read_action(DIRECTION_X);
+//     ymove = read_action(DIRECTION_Y);
+
+//     mouse_report.x = xmove;
+//     mouse_report.y = ymove;
+
+//     #ifdef CONSOLE_ENABLE
+//     uprintf("Mouse pressed: %s\n", !((bool)(readPin(PIN_NAME_BTN))?"true":"false"));
+//     uprintf("Raw  X: %d, Y: %d\n", xmove, ymove);
+//     #endif
+
+//     mouse_report.buttons = pointing_device_handle_buttons(mouse_report.buttons,!((bool)(readPin(PIN_NAME_BTN))),POINTING_DEVICE_BUTTON1);
+
+//     return mouse_report;
+// }
+
+report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
 
     xmove = read_action(DIRECTION_X);
     ymove = read_action(DIRECTION_Y);
@@ -93,22 +111,20 @@ report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
     mouse_report.x = xmove;
     mouse_report.y = ymove;
 
-    #ifdef CONSOLE_ENABLE
-    uprintf("Mouse pressed: %s\n", !((bool)(readPin(PIN_NAME_BTN))?"true":"false"));
-    uprintf("Raw  X: %d, Y: %d\n", xmove, ymove);
-    #endif
+    // トラックボールのボタンが押されたとき
+    if (!readPin(PIN_NAME_BTN)) {
+        tap_code16(LALT(KC_K));  // Alt + K を送信
+    }
 
-    mouse_report.buttons = pointing_device_handle_buttons(mouse_report.buttons,!((bool)(readPin(PIN_NAME_BTN))),POINTING_DEVICE_BUTTON1);
-
-    return mouse_report; 
+    return mouse_report;
 }
 
-uint16_t pointing_device_driver_get_cpi(void) { 
-    return blackberry_mouse_cpi; 
+uint16_t pointing_device_driver_get_cpi(void) {
+    return blackberry_mouse_cpi;
 }
 
 void pointing_device_driver_set_cpi(uint16_t cpi) {
-    blackberry_mouse_cpi = cpi;    
+    blackberry_mouse_cpi = cpi;
 }
 
 # endif
